@@ -1,0 +1,9 @@
+/*
+ * Unlayered, as panes.css is, so this rule wins over the Tailwind utilities of the stock footer.
+ *
+ * Stock shows the footer of an agent message (copy, fork, reply, time) only under the pointer.
+ * A footer that holds the working time of its turn stays visible, so the time shows with no hover.
+ */
+.group\/assistant div:has(> [data-worked-time]) {
+  opacity: 1;
+}

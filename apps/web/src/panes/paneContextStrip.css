@@ -1,0 +1,23 @@
+/*
+ * Unlayered, as panes.css is, so these rules win over the Tailwind utilities of the stock strip.
+ *
+ * Stock collapses every label of the strip under the composer to its icon when the labels do
+ * not fit (`data-compact`). A pane is often that narrow, and the branch is what tells two panes
+ * apart. So in a pane the branch keeps its name and truncates it. The other labels collapse as
+ * in stock. The branch control is the one combobox of the strip that opens a dialog.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-slot="composer-context-strip"][data-compact]
+  [role="combobox"][aria-haspopup="dialog"]
+  [data-composer-label] {
+  /* The stock width limit of a label that is not collapsed (ComposerContextLabel.tsx). */
+  max-width: 240px;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-slot="composer-context-strip"][data-compact]
+  [role="combobox"][aria-haspopup="dialog"]
+  [data-composer-label-motion] {
+  opacity: 1;
+}

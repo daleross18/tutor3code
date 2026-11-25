@@ -1,0 +1,12 @@
+/*
+ * Unlayered, as panes.css is, so this rule wins over the Tailwind utilities of the stock strip.
+ *
+ * Stock shows a pull request badge in the strip under the composer: the glyph and the number,
+ * directly before the branch control. The chip of the fork shows the same pull request with its
+ * CI state, so the stock badge leaves while a chip is in the strip. The branch control is the
+ * one combobox of the strip that opens a dialog.
+ */
+[data-slot="composer-context-strip"]:has([data-pull-request-chip])
+  :is(a, button):has(+ span > [role="combobox"][aria-haspopup="dialog"]) {
+  display: none;
+}

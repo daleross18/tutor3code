@@ -1,0 +1,464 @@
+/*
+ * Unlayered on purpose: `.drag-region` in index.css is unlayered and Tailwind utilities are
+ * layered, so a utility cannot make a pane header no-drag. Every rule is scoped to multi mode.
+ */
+
+/*
+ * `contain: layout` anchors the inline `position: fixed` title-bar controls to their pane. The
+ * pane is a size container, so a rule below can read the pane's own width and height (`cqh`,
+ * `@container tutor-pane`). Stock decides the same things from the window size.
+ */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell] {
+  contain: layout;
+  container: tutor-pane / size;
+  --workspace-controls-top: 0px;
+  --workspace-controls-right: 0.75rem;
+  --workspace-native-controls-inset: 0px;
+  --workspace-titlebar-content-left: 1.25rem;
+}
+
+/* The no-thread view renders its own inset with a viewport height. */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell] [data-slot="sidebar-inset"] {
+  height: 100%;
+}
+
+/* The tab bar drags the window. A pane header or a panel header inside a pane does not. */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell] .drag-region {
+  -webkit-app-region: no-drag;
+}
+
+/*
+ * The stock new-thread screen centers the composer and hangs the headline above it, out of flow.
+ * It moves the composer down by the WINDOW height, so in a short pane the headline covers the
+ * pane header. In a pane, the headline and the notices are in flow, and the whole block is
+ * centered in the pane. When the block does not fit, it sits at the bottom, so the composer and
+ * the strip under it show, and the headline with the project picker scrolls into view from
+ * above. A reversed column is what lets the part above the top edge scroll. The scroll bar is
+ * not shown: a classic scroll bar would take 15 px of a 200 px pane. The top edge fades, so a
+ * headline that is partly scrolled out does not end in half a line of text.
+ * `items-center` marks the screen: the docked composer overlay does not have it.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"].items-center {
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 0.75rem);
+}
+/* The auto margins center the block where it fits. They are zero where it does not. */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"].items-center
+  > .chat-composer-lane {
+  margin-block: auto;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"].items-center
+  [data-chat-composer-stack="true"]
+  :is(.absolute.bottom-full, .absolute.top-full) {
+  position: static;
+}
+
+/*
+ * Stock widens the chat gutters from the 640 px WINDOW breakpoint. A pane below that width
+ * keeps the phone gutters. These are the stock rules of index.css for a narrow window.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-compact="true"]
+  .chat-composer-lane {
+  padding-inline-start: calc(
+    env(safe-area-inset-left) + 0.75rem + var(--chat-lane-inset-start, 0px)
+  );
+  padding-inline-end: calc(env(safe-area-inset-right) + 0.75rem + var(--chat-lane-inset-end, 0px));
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-compact="true"]
+  [data-chat-canvas]
+  .messages-timeline-scroll {
+  padding-inline-start: calc(
+    0.75rem + var(--chat-lane-inset-start, 0px) - var(--chat-timeline-gutter, 0px)
+  );
+  padding-inline-end: calc(
+    0.75rem + var(--chat-lane-inset-end, 0px) - var(--chat-timeline-gutter, 0px)
+  );
+}
+
+/*
+ * A pane too narrow for the right panel has no right-panel toggle (hunk C12), so its header
+ * reserves room for two controls. Stock reserves 6rem for three, and a control takes 2rem.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-narrow="true"]
+  [data-chat-header]
+  > .pr-24 {
+  padding-right: 4rem;
+}
+
+/*
+ * The close button of a pane (PaneCloseButton.tsx) is the last control of the header row. The
+ * stock controls move 1.75rem to the left, and the header reserves that much more room.
+ */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell][data-pane-closable="true"] {
+  --workspace-controls-right: 2.5rem;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-closable="true"]
+  [data-chat-header]
+  > .pr-24 {
+  padding-right: 7.75rem;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-closable="true"][data-pane-narrow="true"]
+  [data-chat-header]
+  > .pr-24 {
+  padding-right: 5.75rem;
+}
+
+/*
+ * A chat pane moves by the free area of its header (paneChatDrag.ts). The header shows the grab
+ * cursor, and keeps 1.25rem free after the title, so a long title leaves a place to take hold.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-draggable="true"]
+  [data-chat-header] {
+  cursor: grab;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-draggable="true"]
+  [data-chat-header]:active {
+  cursor: grabbing;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-draggable="true"]
+  [data-chat-header]
+  > .flex-1 {
+  margin-inline-end: 1.25rem;
+}
+
+/*
+ * Stock leaves 1rem to 1.25rem of bare space under the strip of the docked composer, and the
+ * strip is glass. A chat that is not at its end shows through both. In a pane the space is
+ * 0.375rem, and it and the strip have the page color.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"]:not(.items-center)
+  [data-slot="composer-context-strip"] {
+  background: var(--background);
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"]:not(.items-center)
+  [data-chat-composer-stack="true"]:has([data-slot="composer-context-strip"])
+  > .relative.z-10
+  > [aria-hidden]:last-child {
+  background: var(--background);
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]:not([data-pane-short="true"])
+  [data-chat-composer-overlay="true"]:not(.items-center)
+  [data-chat-composer-stack="true"]:has([data-slot="composer-context-strip"])
+  > .relative.z-10
+  > [aria-hidden]:last-child {
+  height: 0.375rem;
+}
+
+/* The stock phone size of the new-thread headline (`text-2xl`, and `sm:text-3xl` by WINDOW). */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-compact="true"]
+  [data-chat-composer-stack="true"]
+  h1 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+/*
+ * A pane below 320 px (PANE_SHORT_MAX_HEIGHT_PX): the header has the stock minimum height, the
+ * composer starts at one line with small paddings, and the strip under it sits close to it. In
+ * Normal density the header takes 40 px and the composer, the strip and the gap under them take
+ * 97 px, which is why MIN_PANE_HEIGHT_PX is 140 (paneTree.ts). The sizes are `rem` literals, so
+ * a density does not shrink them a second time.
+ */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell][data-pane-short="true"] {
+  --workspace-topbar-height: 40px;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-overlay="true"]
+  .composer-tiptap {
+  min-height: calc(1lh + 0.5rem);
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-body="true"] {
+  padding-top: 0.25rem;
+  padding-bottom: 0.125rem;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-footer="true"] {
+  padding-bottom: 0.25rem;
+}
+/* The placeholder is out of flow. On two lines it would cover the composer's footer. */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-body="true"]
+  .text-placeholder.absolute {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-slot="composer-context-strip"] {
+  padding-top: 0.125rem;
+}
+/* `[aria-hidden]` makes this rule more specific than the density rule for the same spacer. */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-stack="true"]
+  > .relative
+  > [aria-hidden][class*="safe-area-inset-bottom"] {
+  height: 0.25rem;
+}
+
+/*
+ * The headline of the new-thread screen in a short pane. Stock hides the question ("What should
+ * we build") from sight in a WINDOW of 28rem or less and keeps the project picker. A short pane
+ * does the same, with the stock `sr-only` values, so a pane of 216 px shows the picker, "or
+ * start without a project" and the composer with nothing cut.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-stack="true"]
+  h1
+  > span:first-child {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border-width: 0;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-stack="true"]
+  h1
+  > span:last-child
+  > span:last-child:not(:first-child) {
+  display: none;
+}
+
+/*
+ * A prompt of many lines. The stock editor grows to 13rem (`max-h-52`) whatever the height of
+ * its window. In a pane it also stops where the composer would reach the pane header, and then
+ * scrolls inside itself. Measured in Normal density, with the strip under the composer: the
+ * parts of a pane other than the editor take the header plus 110 px (6.875rem), and in a short
+ * pane the header plus 66 px (4.125rem). Each limit below adds 4 px. The stock minimum height of
+ * the editor wins over this limit, as `min-height` does over `max-height`.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-composer-overlay="true"]
+  .composer-tiptap {
+  max-height: min(
+    calc(var(--spacing) * 52),
+    calc(100cqh - var(--workspace-topbar-height) - 7.125rem)
+  );
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-composer-overlay="true"]
+  .composer-tiptap {
+  max-height: min(
+    calc(var(--spacing) * 52),
+    calc(100cqh - var(--workspace-topbar-height) - 4.375rem)
+  );
+}
+
+/*
+ * The model button of the composer footer. Its effort word ("Medium") does not shrink, so in a
+ * pane near the minimum width it was painted over the microphone. Below 280 px the button shows
+ * the model only, and at every width its content stops at the button's own edge.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-chat-provider-model-picker="true"]
+  > span {
+  overflow: clip;
+  overflow-clip-margin: 4px;
+}
+@container tutor-pane (width < 280px) {
+  [data-splitpane-root][data-multi="true"]
+    [data-splitpane-cell]
+    [data-chat-composer-footer="true"]
+    [data-chat-provider-model-picker="true"]
+    > span
+    > span:has(> [data-composer-control-label]) {
+    display: none;
+  }
+}
+
+/*
+ * The stock launcher of the right panel ("Open a surface") centers its list in a scroller. In a
+ * pane too short for the list, the part above the top edge could not be reached. `safe` starts
+ * the list at the top there.
+ */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell] [data-surface-launcher-keys] {
+  align-items: safe center;
+}
+
+/*
+ * The text of a thread with no message ("Send a message to start the conversation."). Stock
+ * centers it in the space above the composer. Where that space is too low, the text was over
+ * the pane header. It stays inside its own box, with the phone gutter, and a pane below 200 px
+ * of height does not show it: the header and the composer leave less than two lines there.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell]
+  [data-workspace-area="conversation"]
+  div.flex.h-full.items-center.justify-center:has(> p:only-child) {
+  overflow: hidden;
+  padding-inline: 0.75rem;
+  text-align: center;
+}
+@container tutor-pane (height < 200px) {
+  [data-splitpane-root][data-multi="true"]
+    [data-splitpane-cell]
+    [data-workspace-area="conversation"]
+    div.flex.h-full.items-center.justify-center:has(> p:only-child)
+    > p {
+    visibility: hidden;
+  }
+}
+
+/*
+ * The terminal drawer in a short pane. Stock gives the drawer what the header and the composer
+ * leave, which is 5 px in a pane of 140 px. A short pane shows one thing at a time: an open
+ * drawer takes the pane below the header, and the drawer toggle brings the chat back. The
+ * `data-workspace-area` attribute marks the drawer that shows. The inline height that stock
+ * computes loses to `!important`, so the drag handle has no effect and is not shown.
+ */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-column] {
+  position: relative;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-column]
+  > div:has(> div > [data-thread-terminal-drawer][data-workspace-area="terminal"]) {
+  position: absolute;
+  inset: var(--workspace-topbar-height) 0 0 0;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-column]
+  [data-thread-terminal-drawer][data-workspace-area="terminal"] {
+  height: 100% !important;
+}
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-column]
+  [data-thread-terminal-drawer][data-workspace-area="terminal"]
+  > .cursor-row-resize {
+  display: none;
+}
+/* The covered timeline and composer take no focus, so no key types into a hidden composer. */
+[data-splitpane-root][data-multi="true"]
+  [data-splitpane-cell][data-pane-short="true"]
+  [data-chat-column]:has(
+    > div > div > [data-thread-terminal-drawer][data-workspace-area="terminal"]
+  )
+  > [data-chat-header]
+  + div {
+  visibility: hidden;
+}
+
+/*
+ * The stock list of a drawer with two or more terminals is 9rem wide, which leaves two columns
+ * of text in a pane of 200 px. In a drawer below 400 px the list is 5.5rem wide: its four
+ * buttons take that width, and its labels truncate as in stock.
+ */
+[data-splitpane-root][data-multi="true"] [data-splitpane-cell] [data-thread-terminal-drawer] {
+  container-type: inline-size;
+}
+@container (width < 400px) {
+  [data-splitpane-root][data-multi="true"]
+    [data-splitpane-cell]
+    [data-thread-terminal-drawer]
+    aside.w-36 {
+    width: 5.5rem;
+    min-width: 5.5rem;
+  }
+}
+
+/* The drag areas of the dividers stay above every pane. */
+[data-splitpane-root][data-multi="true"] [data-pane-divider] {
+  z-index: 2;
+}
+
+/*
+ * The focus mark, only where a tab has more than one pane. The focused pane is above the divider
+ * lines, so the ring is whole. 51 is one above the inline z-50 controls, and the pane is its own
+ * stacking context.
+ */
+[data-splitpane-root][data-multi="true"]:not([data-pane-count="1"])
+  [data-splitpane-cell][data-pane-focused="true"] {
+  z-index: 1;
+}
+[data-splitpane-root][data-multi="true"]:not([data-pane-count="1"])
+  [data-splitpane-cell][data-pane-focused="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 51;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 50%, transparent);
+}
+
+/*
+ * Setting "Fade panes without focus": a veil in the background color over each pane without
+ * focus. The pane is a stacking context (`contain: layout`), so the veil covers the whole pane
+ * and nothing outside it. It takes no pointer event, so a press still lands in the pane. The
+ * opacity changes once per focus move and never animates by itself. The drop overlay is in a
+ * portal on the body, so it does not fade.
+ */
+[data-splitpane-root][data-fade-panes] [data-splitpane-cell]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background-color: var(--background);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+}
+
+[data-splitpane-root][data-fade-panes] [data-splitpane-cell][data-pane-faded="true"]::before {
+  opacity: 0.3;
+}
+
+/*
+ * The floating preview stays above the veil. In the desktop app its page is a webview layer
+ * outside the pane that the veil cannot cover, so a faded frame would not match its page. No
+ * stacking context lies between the frame and the pane, so this z-index counts in the pane.
+ */
+[data-splitpane-root][data-fade-panes]
+  [data-splitpane-cell][data-pane-faded="true"]
+  [data-preview-mini-player] {
+  z-index: 101;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-splitpane-root][data-fade-panes] [data-splitpane-cell]::before {
+    transition: none;
+  }
+}

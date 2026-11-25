@@ -1,0 +1,14 @@
+/*
+ * Unlayered, as panes.css is, so these rules win over the Tailwind utilities of the stock strip.
+ *
+ * The folder item of the strip under the composer has no label when the fork hides it
+ * (worktreeLabel.ts). The item and the separator before it then take no space.
+ */
+[data-slot="composer-context-strip"]
+  [data-composer-context-control]:has(> [data-composer-label] > [data-composer-label-motion]:empty),
+[data-slot="composer-context-strip"]
+  [data-slot="separator"]:has(
+    + [data-composer-context-control] > [data-composer-label] > [data-composer-label-motion]:empty
+  ) {
+  display: none;
+}

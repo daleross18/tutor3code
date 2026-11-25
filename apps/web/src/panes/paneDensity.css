@@ -1,0 +1,182 @@
+/*
+ * Chat density. The pane host resolves `data-chat-density` from the pane count of the active tab.
+ * No rule matches `normal`, so Normal is the stock look. Compact and Very compact scale the
+ * Tailwind theme variables that the stock markup reads, inside the timeline and the composer
+ * only. Every size stays a multiple of `rem`, so the Interface font size still scales it.
+ * Unlayered on purpose: the stock markdown rules of index.css are unlayered too.
+ */
+
+/*
+ * The multipliers. text: font size. space: the Tailwind spacing unit, which also sizes icons and
+ * controls, so it stays mild. block: gaps between timeline rows and between markdown blocks.
+ * The prompt and code sizes are copied here, because the scope below replaces them.
+ */
+[data-splitpane-root][data-chat-density="compact"] {
+  --fork-density-text: 0.93;
+  --fork-density-space: 0.875;
+  --fork-density-block: 0.5;
+  --fork-density-leading: 1.45;
+}
+[data-splitpane-root][data-chat-density="very-compact"] {
+  --fork-density-text: 0.86;
+  --fork-density-space: 0.75;
+  --fork-density-block: 0.35;
+  --fork-density-leading: 1.38;
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"]) {
+  --fork-density-prompt-base: var(--font-size-prompt, 0.875rem);
+  --fork-density-code-base: var(--font-size-code, 0.8125rem);
+  --fork-density-diffs-base: var(--diffs-font-size, 0.8125rem);
+}
+
+/* The scope: the timeline scroller and the composer overlay of each pane. */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  :is(.messages-timeline-scroll, [data-chat-composer-overlay="true"]) {
+  --spacing: calc(0.25rem * var(--fork-density-space));
+  /* 0.625rem is the smallest stock text size (text-3xs). No text goes below it. */
+  --text-xs: max(calc(0.75rem * var(--fork-density-text)), 0.625rem);
+  --text-sm: calc(0.875rem * var(--fork-density-text));
+  --text-base: calc(1rem * var(--fork-density-text));
+  --text-lg: calc(1.125rem * var(--fork-density-text));
+  --text-xl: calc(1.25rem * var(--fork-density-text));
+  --text-2xl: calc(1.5rem * var(--fork-density-text));
+  --text-3xl: calc(1.875rem * var(--fork-density-text));
+  --leading-relaxed: var(--fork-density-leading);
+  --leading-normal: min(1.5, var(--fork-density-leading));
+  --font-size-prompt: calc(var(--fork-density-prompt-base) * var(--fork-density-text));
+  --font-size-code: calc(var(--fork-density-code-base) * var(--fork-density-text));
+  --diffs-font-size: calc(var(--fork-density-diffs-base) * var(--fork-density-text));
+}
+
+/* `text-2xs` is an inline theme size in index.css, so its utility holds a literal. */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  :is(.messages-timeline-scroll, [data-chat-composer-overlay="true"])
+  .text-2xs {
+  font-size: max(calc(0.6875rem * var(--fork-density-text)), 0.625rem);
+}
+
+/* The gap under a timeline row: the stock `pb-*` utility of the row wrapper. */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  [data-timeline-row-kind].pb-4 {
+  padding-bottom: calc(1rem * var(--fork-density-block));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  [data-timeline-row-kind].pb-2 {
+  padding-bottom: calc(0.5rem * var(--fork-density-block));
+}
+
+/*
+ * The stock markdown rules of index.css hold `rem` literals. These are the same rules with the
+ * multipliers. The resets after them repeat the stock resets, which the first rule would beat.
+ */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  :is(p, ul, ol, blockquote, pre, .chat-markdown-table-container, .chat-markdown-codeblock) {
+  margin-block: calc(0.65rem * var(--fork-density-block));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  :is(h1, h2, h3, h4, h5, h6) {
+  margin-block: calc(1.25rem * var(--fork-density-block)) calc(0.5rem * var(--fork-density-block));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  > :first-child {
+  margin-top: 0;
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  > :last-child {
+  margin-bottom: 0;
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  :is(.chat-markdown-codeblock pre, section[data-footnotes] ol) {
+  margin: 0;
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  li
+  + li {
+  margin-top: calc(0.25rem * var(--fork-density-block));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  h1 {
+  font-size: calc(1.25rem * var(--fork-density-text));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  h2 {
+  font-size: calc(1.125rem * var(--fork-density-text));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  h3 {
+  font-size: calc(1rem * var(--fork-density-text));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  :is(h4, h5, h6, table) {
+  font-size: calc(0.875rem * var(--fork-density-text));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  pre {
+  padding: calc(0.8rem * var(--fork-density-space)) calc(0.9rem * var(--fork-density-space));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  :is(th, td) {
+  padding-block: calc(0.45rem * var(--fork-density-block));
+}
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .chat-markdown
+  thead
+  th {
+  padding-block: calc(0.55rem * var(--fork-density-block));
+}
+
+/*
+ * A work row centers its 1.5rem icon box on the cap height with a literal `0.75rem`
+ * (chat/WorkLog.tsx). The box follows the spacing unit, so the offset must follow it too.
+ */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  .messages-timeline-scroll
+  .align-\[calc\(0\.5cap_-_0\.75rem\)\] {
+  vertical-align: calc(0.5cap - 0.75rem * var(--fork-density-space));
+}
+
+/*
+ * The spacer under the composer holds `rem` literals (ChatView.tsx, the last child of the
+ * composer stack): 1rem below the 640 px window breakpoint, 1.25rem from it.
+ */
+[data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+  [data-chat-composer-stack="true"]
+  > .relative.z-10
+  > [aria-hidden]:last-child {
+  height: calc(env(safe-area-inset-bottom) + 1rem * var(--fork-density-block));
+}
+@media (min-width: 640px) {
+  [data-splitpane-root]:is([data-chat-density="compact"], [data-chat-density="very-compact"])
+    [data-chat-composer-stack="true"]
+    > .relative.z-10
+    > [aria-hidden]:last-child {
+    height: calc(env(safe-area-inset-bottom) + 1.25rem * var(--fork-density-block));
+  }
+}

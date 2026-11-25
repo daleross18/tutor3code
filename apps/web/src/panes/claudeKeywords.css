@@ -1,0 +1,10 @@
+/*
+ * A word that Claude Code reads in a prompt ("ultracode", "ultrathink"), in the composer of a
+ * Claude provider. The CSS Custom Highlight API paints it, so the editor keeps the stock DOM.
+ * `--update-foreground` is the action color of the theme in its form for text: it is readable
+ * where `--primary` is not (the light Tutor palette).
+ */
+::highlight(fork-claude-keyword) {
+  color: var(--update-foreground);
+  background-color: color-mix(in oklab, var(--primary) 18%, transparent);
+}
