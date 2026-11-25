@@ -849,7 +849,7 @@ describe("composer and pull request shortcuts", () => {
         platform: "Linux",
         context: { terminalFocus: false },
       }),
-      "composer.dictation",
+      "layout.splitDown",
     );
     assert.strictEqual(
       resolveShortcutCommand(chord, DEFAULT_RESOLVED_KEYBINDINGS, {

@@ -36,7 +36,9 @@ import { useSearchableSetting } from "./settingsSearch";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { PanelAnimationsPreview } from "./PanelAnimationsPreview";
 import { TypographySection } from "./TypographySettings";
+import { ForkSettingsSection } from "../../panes/ForkSettingsSection";
 import { ThreadDetailsItemsRow } from "./ThreadDetailsItemsRow";
+import { PaneDensitySettingsRows } from "../../panes/PaneDensitySettings";
 
 const ENVIRONMENT_IDENTIFICATION_LABELS: Record<EnvironmentIdentificationMode, string> = {
   artwork: msg("Artwork"),
@@ -294,6 +296,7 @@ export function AppearanceSettingsPanel() {
             </div>
           }
         />
+        <PaneDensitySettingsRows />
         <ThreadDetailsItemsRow />
         <SettingsRow
           {...searchableSetting("effort-display")}
@@ -494,6 +497,8 @@ export function AppearanceSettingsPanel() {
           />
         </AdvancedSettings>
       </SettingsSection>
+
+      <ForkSettingsSection />
 
       <TypographySection />
     </SettingsPageContainer>

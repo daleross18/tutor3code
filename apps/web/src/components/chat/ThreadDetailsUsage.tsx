@@ -25,6 +25,7 @@ import { formatUpcomingTimestamp } from "../../timestampFormat";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { formatContextWindowCompactionMessage } from "./compaction.logic";
 import { ThreadDetailsSection } from "./ThreadDetailsSection";
+import { ContextBreakdownRow } from "../../panes/ContextBreakdown";
 
 const PACE_LABEL: Record<LimitPace, string> = {
   ahead: msg("Ahead of pace"),
@@ -110,7 +111,9 @@ export function ThreadDetailsContext({ usage }: { readonly usage: ContextWindowS
       showHeading={false}
     >
       <div className="grid grid-cols-[auto_minmax(3rem,1fr)_auto] gap-x-3 text-xs">
-        <UsageRow
+        <ContextBreakdownRow
+          row={UsageRow}
+          usage={usage}
           label={gt("Context", { $context: "context window row label" })}
           fill={used}
           tone={used === null ? null : used >= 90 ? "error" : used >= 80 ? "warning" : null}

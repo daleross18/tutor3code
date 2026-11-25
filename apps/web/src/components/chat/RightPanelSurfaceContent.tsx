@@ -16,6 +16,7 @@ import SideChatPane from "./SideChatPane";
 import type { ComposerImageAttachment, DraftId } from "../../composerDraftStore";
 import type { ShortcutMatchContext } from "../../keybindings";
 import type { SideChatParentPanel } from "../../lib/sideChatPane";
+import { usePanePassive } from "../../panes/paneContext";
 import { type RightPanelSurface, useRightPanelStore } from "../../rightPanelStore";
 import {
   PersistentThreadTerminalPanel,
@@ -85,6 +86,7 @@ export function RightPanelSurfaceContent(props: {
   readonly sideChatParentPanel: SideChatParentPanel;
 }) {
   const { surface, threadRef, visible, onCloseSurface } = props;
+  const panePassive = usePanePassive();
   const gt = useGT();
   if (surface === null) return null;
   switch (surface.kind) {
@@ -136,7 +138,7 @@ export function RightPanelSurfaceContent(props: {
       return (
         <PullRequestDetailPanel
           getShortcutContext={props.getShortcutContext}
-          shortcutsEnabled={visible && props.activeSurfaceId === surface.id}
+          shortcutsEnabled={visible && !panePassive && props.activeSurfaceId === surface.id}
           key={`${scopedThreadKey(threadRef)}:${surface.id}`}
           environmentId={props.environmentId}
           onSelectPullRequest={(reference) => {

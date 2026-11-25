@@ -27,6 +27,7 @@ import {
 import { ChevronRightIcon } from "lucide-react";
 import { ModelListRow } from "./ModelListRow";
 import { ModelPickerSidebar } from "./ModelPickerSidebar";
+import { AccountQuotaList } from "../../panes/AccountQuotaList";
 import { useProviderWorkspaceSnapshotRefresh } from "./useProviderWorkspaceSnapshotRefresh";
 import { getProviderStatusMessage, hasProviderSetup } from "./ProviderStatusBanner";
 import {
@@ -1231,6 +1232,11 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
               }
               onRequestClose={onRequestClose}
               onOpenProviderSetup={onOpenProviderSetup}
+            />
+            <AccountQuotaList
+              instanceEntries={instanceEntries}
+              activeInstanceId={props.activeInstanceId}
+              model={props.model}
             />
             {props.listFooter}
           </div>

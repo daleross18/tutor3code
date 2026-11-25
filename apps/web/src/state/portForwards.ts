@@ -16,6 +16,7 @@ import { msg } from "gt-react";
 import type { ConnectionTarget } from "@t3tools/client-runtime/connection";
 
 import { tunnelsEnvironmentLoopback } from "../browser/browserTargetResolver";
+import { hasPreviewTunnelRoute } from "../panes/previewTunnelRoute";
 import { m } from "../i18n/messages";
 import { environmentAtomList } from "./environmentAtomList";
 import { environmentSession } from "./session";
@@ -56,12 +57,15 @@ export function usePortForwards(): ReadonlyArray<DesktopPortForward> {
 /** Only the desktop app forwards, and only from environments whose tunnel it may use. */
 export const canForwardPorts = (environment: {
   readonly entry: { readonly target: ConnectionTarget };
-  readonly serverConfig: Parameters<typeof allowsPreviewTunnel>[0] | null;
+  readonly serverConfig:
+    | (Parameters<typeof allowsPreviewTunnel>[0] & Parameters<typeof hasPreviewTunnelRoute>[0])
+    | null;
 }): boolean =>
   previewBridge() !== undefined &&
   tunnelsEnvironmentLoopback(environment.entry.target) &&
   environment.serverConfig !== null &&
-  allowsPreviewTunnel(environment.serverConfig);
+  allowsPreviewTunnel(environment.serverConfig) &&
+  hasPreviewTunnelRoute(environment.serverConfig);
 
 /**
  * Whether the environment runs on another machine. A saved route can still lead back to this

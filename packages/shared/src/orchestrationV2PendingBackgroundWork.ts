@@ -10,7 +10,10 @@ import type {
 import { isOrchestrationV2WorkActive } from "@t3tools/contracts";
 import * as Predicate from "effect/Predicate";
 
+import { awaitedTaskHolds, pullRequestWatchHoldsThread } from "./panePullRequestWatchHold.ts";
 import { resolveT3McpToolId } from "./t3McpToolPresentation.ts";
+
+export { setPullRequestWatchHoldsThread } from "./panePullRequestWatchHold.ts";
 
 const BACKGROUND_TURN_ITEM_TYPES = new Set<OrchestrationV2TurnItem["type"]>([
   "command_execution",
@@ -103,7 +106,7 @@ export function backgroundWorkHoldsCompletion(
   tasks: ReadonlyArray<Pick<PendingBackgroundWorkTask, "kind" | "awaited">>,
 ): boolean {
   return tasks.some(
-    (task) => task.awaited === true || backgroundWorkKindHoldsCompletion(task.kind),
+    (task) => awaitedTaskHolds(task) || backgroundWorkKindHoldsCompletion(task.kind),
   );
 }
 
@@ -345,9 +348,10 @@ function pullRequestWatchTasks(
             // Once every check finished, a person moves the PR next: the watch stays on but holds
             // nothing, unless the agent said it acts on the PR itself. A merged PR's watch holds
             // until its read wakes the agent, so settling on merge waits.
-            ...(link.watch.checksPending === false &&
-            link.watch.until !== "merged" &&
-            link.snapshot?.state !== "merged"
+            ...(!pullRequestWatchHoldsThread() ||
+            (link.watch.checksPending === false &&
+              link.watch.until !== "merged" &&
+              link.snapshot?.state !== "merged")
               ? {}
               : { awaited: true as const }),
           },

@@ -52,6 +52,7 @@ import { useThreadRouteTarget } from "./useThreadRouteTarget";
 import { readUnloadedThreadCount } from "../state/olderSettledShelf";
 import { resolveProjectDefaultProviderModelSelection } from "../providerInstances";
 import { resolveNewThreadModelSelection } from "@t3tools/shared/usageLimits";
+import { pickNewThreadAccount } from "../panes/newThreadAccount";
 
 export const LAST_USED_PROJECT_STORAGE_KEY = "t3code:last-used-project:v1";
 export const lastUsedProjectKeySchema = Schema.NullOr(Schema.String);
@@ -189,7 +190,7 @@ export function createNewThreadHandler(router: AnyRouter) {
       ? fallbackResolution.selection
       : configuredDefaultModelSelection;
     const defaultRuntimeMode = projectSettings.settings.defaultRuntimeMode;
-    const resolveModelSelectionOverride = (destinationDraftId: DraftId) =>
+    const resolveStockModelSelectionOverride = (destinationDraftId: DraftId) =>
       resolveNewThreadModelSelectionOverride({
         projectDefaultSelection: projectDefaultModelSelection ?? null,
         carrySelection: carryModelSelection,
@@ -197,6 +198,8 @@ export function createNewThreadHandler(router: AnyRouter) {
           currentRouteTarget?.kind === "draft" ? currentRouteTarget.draftId : null,
         destinationDraftId,
       });
+    const resolveModelSelectionOverride = (id: DraftId) =>
+      pickNewThreadAccount(resolveStockModelSelectionOverride(id), id, projectRef);
     const resolveDefaultEnvMode = async (): Promise<DraftThreadEnvMode> => {
       // Environment queries wait for a connection, so reading the project file on an
       // offline machine would never settle and the draft would never open.

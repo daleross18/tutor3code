@@ -62,6 +62,7 @@ import type { PreviewStreamViewport } from "@t3tools/client-runtime/preview/serv
 import { previewBridge } from "./previewBridge";
 import { PreviewUnreachable } from "./PreviewUnreachable";
 import { showPreviewPopup } from "./showPreviewPopup";
+import { FloatingPreviewExtras } from "../../panes/FloatingPreviewExtras";
 import {
   type PreviewMiniPlayerGesture,
   settlePreviewMiniPlayerResize,
@@ -665,6 +666,7 @@ function MiniPlayerShell({
                 </TooltipPopup>
               </Tooltip>
               {pillActions}
+              <FloatingPreviewExtras threadRef={threadRef} miniPlayer={miniPlayer} />
               <Tooltip>
                 <TooltipTrigger
                   render={

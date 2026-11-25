@@ -30,6 +30,7 @@ import { Fragment } from "react";
 import { m, type MessageResolver } from "~/i18n/messages";
 import { tickTextContent } from "~/lib/tickTextContent";
 import { BackgroundWorkDetails } from "./BackgroundWorkDetails";
+import { BackgroundWorkTokens } from "../../panes/WorkTokenLabels";
 import { Button, InlineButton } from "../ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
 import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
@@ -277,6 +278,12 @@ export function backgroundWorkNowItem(
     ),
     actions: (
       <>
+        <BackgroundWorkTokens
+          environmentId={input.environmentId}
+          threadId={input.threadId}
+          tasks={input.tasks}
+          turnItems={input.turnItems}
+        />
         {startedAtMs === null ? null : (
           <span
             ref={tickTextContent(

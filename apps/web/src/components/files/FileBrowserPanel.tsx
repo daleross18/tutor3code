@@ -44,6 +44,7 @@ import { useDirectoryEntries } from "./useDirectoryEntries";
 import { useProjectPathSearch } from "~/state/queries";
 import { isMacPlatform } from "~/lib/utils";
 import { type PreviewAction, subscribePreviewAction } from "../preview/previewActionBus";
+import { isInPassivePane } from "../../panes/paneDom";
 
 interface FileBrowserPanelProps {
   environmentId: EnvironmentId;
@@ -349,6 +350,7 @@ export default function FileBrowserPanel({
   };
   const onPanelAction = useEffectEvent((action: PreviewAction) => {
     // Hidden panel tabs stay mounted; only the visible Files tab answers.
+    if (isInPassivePane(searchInputRef.current)) return;
     if (action === "find" && searchInputRef.current?.getClientRects().length) focusSearch();
   });
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- subscribes to the panel find command, which fires while focus is anywhere in the right panel

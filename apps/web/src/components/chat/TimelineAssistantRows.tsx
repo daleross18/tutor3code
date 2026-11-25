@@ -36,6 +36,7 @@ import { MESSAGE_HEADING_LEVEL, MessageAuthorHeading } from "./TimelineRowParts"
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/reactivity";
 import { vcsEnvironment } from "../../state/vcs";
+import { WorkedTimeLabel } from "../../panes/WorkedTimeLabel";
 
 const NO_VCS_STATUS = Atom.make(AsyncResult.initial());
 
@@ -272,6 +273,7 @@ function AssistantMessageMeta({
           </TooltipPopup>
         </Tooltip>
       )}
+      <WorkedTimeLabel message={message} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { createContext, type ReactElement, type ReactNode, use } from "react";
 import { msg, T, useGT, useMessages } from "gt-react";
 import type { MessageResolver } from "../i18n/messages";
 import { ComposerContextActionsContext } from "./composerContextActions";
+import { renderPasteCollapseChip } from "../panes/PasteCollapseChip";
 
 import type { ComposerFileAttachment, ComposerImageAttachment } from "~/composerDraftStore";
 import { composerFileNeedsReattach } from "~/composerDraftStore";
@@ -574,7 +575,8 @@ const composerContextPresentationRegistry = createContextPresentationRegistry<
         ),
     },
   ],
-  fallback: (_kind, _entry, context) => <UnresolvedContextChip label={context.label} />,
+  fallback: (kind, _entry, context) =>
+    renderPasteCollapseChip(kind, context.label) ?? <UnresolvedContextChip label={context.label} />,
 });
 
 export function ComposerContextReferenceChip(props: {

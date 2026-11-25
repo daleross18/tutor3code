@@ -111,7 +111,10 @@ import { PierreEntryIcon } from "./chat/PierreEntryIcon";
 import { resolvePullRequestState } from "./pullRequest/pullRequestPresentation";
 import { PullRequestGlyph } from "~/components/pullRequest/pullRequestIcons";
 import { observeResize } from "~/lib/observeResize";
+import { panelTabLeftPanel, usePanelTabDragId } from "../panes/panelTabDrag";
 import { surfaceShortcutKey } from "~/lib/surfaceShortcutKey";
+import { usePanePassive } from "../panes/paneContext";
+import { isInPassivePane } from "../panes/paneDom";
 
 export interface RightPanelTabsProps {
   mode: PreviewPanelMode;
@@ -429,9 +432,10 @@ function RightPanelEmptyState(props: {
   const highlightIndex =
     availableActions.length === 0 ? -1 : Math.min(highlight, availableActions.length - 1);
 
+  const panePassive = usePanePassive();
   const handleShortcut = useEffectEvent((event: KeyboardEvent) => {
     const action = surfaceShortcutActionForKey(availableActions, event);
-    if (!action) return;
+    if (!action || panePassive) return;
     if (document.querySelector(LAUNCHER_SHORTCUT_BLOCKING_LAYERS)) return;
     const target = event.composedPath()[0] ?? event.target;
     if (target instanceof Element && surfaceShortcutTargetsTypingContext(target)) return;
@@ -890,7 +894,7 @@ function SortableTabList(props: {
   const surfaceIds = props.surfaces.map((surface) => surface.id);
   const { onMove, surfaces } = props;
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return;
+    if (panelTabLeftPanel() || !over || active.id === over.id) return;
     const toIndex = surfaces.findIndex((surface) => surface.id === over.id);
     if (toIndex >= 0) onMove?.(String(active.id), toIndex);
   };
@@ -956,6 +960,7 @@ function RightPanelTab(
     onStartRename,
     onFinishRename,
   } = props;
+  const panelTabDragId = usePanelTabDragId(surface);
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: surface.id,
     disabled: props.dragDisabled,
@@ -1077,6 +1082,7 @@ function RightPanelTab(
   return (
     <div
       data-active-tab={props.active}
+      data-right-panel-surface={panelTabDragId}
       onMouseDown={preventTabMiddleButtonDefault}
       onMouseUp={preventTabMiddleButtonDefault}
       onAuxClick={(event) => onAuxClick(event, surface)}
@@ -1118,7 +1124,7 @@ export function RightPanelTabs(props: RightPanelTabsProps) {
   if (props.open === false && addSurfaceMenuOpen) setAddSurfaceMenuOpen(false);
 
   const onNewSurfaceKeyDown = useEffectEvent((event: KeyboardEvent) => {
-    if (event.defaultPrevented || event.isComposing) return;
+    if (event.defaultPrevented || event.isComposing || isInPassivePane(tabListRef.current)) return;
     if (
       resolveShortcutCommand(event, props.keybindings, {
         context: { ...props.getShortcutContext(), rightPanelOpen: true },

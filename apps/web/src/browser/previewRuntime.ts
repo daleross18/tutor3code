@@ -19,6 +19,7 @@ import {
 import { environmentServerConfigsAtom } from "~/state/server";
 
 import { tunnelsEnvironmentLoopback } from "./browserTargetResolver";
+import { hasPreviewTunnelRoute } from "../panes/previewTunnelRoute";
 
 /** Whether this desktop loads the environment's localhost itself: it is local, or its tunnel is on. */
 const desktopLoadsLoopbackAtom = Atom.family((environmentId: EnvironmentId) =>
@@ -26,7 +27,7 @@ const desktopLoadsLoopbackAtom = Atom.family((environmentId: EnvironmentId) =>
     const target = get(environmentCatalog.catalogValueAtom).entries.get(environmentId)?.target;
     if (!tunnelsEnvironmentLoopback(target)) return true;
     const config = get(environmentServerConfigsAtom).get(environmentId);
-    return config !== undefined && allowsPreviewTunnel(config);
+    return config !== undefined && allowsPreviewTunnel(config) && hasPreviewTunnelRoute(config);
   }).pipe(Atom.withLabel(`preview:desktop-loads-loopback:${environmentId}`)),
 );
 

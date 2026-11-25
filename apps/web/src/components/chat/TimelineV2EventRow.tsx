@@ -16,6 +16,7 @@ import { LinkRequestCard } from "./LinkRequestCard";
 import { SecretRequestCard } from "./SecretRequestCard";
 import { TimelineRowCtx, type TimelineRow } from "./timelineRowContext";
 import { subagentGroupTiming } from "./TimelineV2EventRow.logic";
+import { SubagentGroupWorkTokens } from "../../panes/WorkTokenLabels";
 
 export function V2EventTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "event" }> }) {
   const ctx = use(TimelineRowCtx);
@@ -136,6 +137,10 @@ const V2SubagentGroup = memo(function V2SubagentGroup({
               )}
             >
               {statusSummary}
+              <SubagentGroupWorkTokens
+                environmentId={ctx.activeThreadEnvironmentId}
+                agents={agents}
+              />
             </span>
           </span>
           <span className="shrink-0 text-xs text-muted-foreground tabular-nums">

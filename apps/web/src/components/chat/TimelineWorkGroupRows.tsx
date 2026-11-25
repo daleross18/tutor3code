@@ -42,6 +42,7 @@ import {
   type TimelineRow,
 } from "./timelineRowContext";
 import { TimelineRowTimestamp, ActivityShimmerOverlay } from "./TimelineRowParts";
+import { RunningTurnTokens } from "../../panes/WorkTokenLabels";
 import {
   failedToolIconClassName,
   toolIconAcceptsTint,
@@ -374,6 +375,7 @@ export function WorkingTimelineRow({ row }: { row: Extract<TimelineRow, { kind: 
           {label}
           {shimmer ? <ActivityShimmerOverlay>{label}</ActivityShimmerOverlay> : null}
         </span>
+        <RunningTurnTokens />
         {backgroundWorktreeSetup ? (
           <BackgroundWorktreeSetupChip snapshot={backgroundWorktreeSetup} />
         ) : null}

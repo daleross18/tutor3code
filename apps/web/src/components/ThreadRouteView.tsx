@@ -4,12 +4,12 @@ import { parseThreadKey, threadKey } from "@t3tools/client-runtime/state/entitie
 import { visibilityParentKey } from "@t3tools/client-runtime/state/threads";
 import type { ScopedThreadRef } from "@t3tools/contracts";
 import * as Option from "effect/Option";
-import { Navigate, useNavigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "../panes/paneNavigation";
 import { useEffect, useState } from "react";
 
 import ChatView from "./ChatView";
 import { BackgroundThreadContext, HiddenThreadContext } from "./chat/backgroundThread";
-import { SidebarInset } from "./ui/sidebar";
+import { PaneCellInset, usePanePassive } from "../panes/paneContext";
 import { useComposerDraftStore } from "../composerDraftStore";
 import { useSidebarPendingFileDropStore } from "../sidebarPendingFileDropStore";
 import {
@@ -59,6 +59,7 @@ export function ThreadRouteView({
   background?: boolean;
 }) {
   const navigate = useNavigate();
+  const panePassive = usePanePassive();
   const draftId = target.kind === "draft" ? target.draftId : null;
   const draftSession = useComposerDraftStore((store) =>
     draftId === null ? null : store.getDraftSession(draftId),
@@ -225,14 +226,14 @@ export function ThreadRouteView({
   }
 
   return (
-    <SidebarInset
+    <PaneCellInset
       className="h-svh min-h-0 overflow-hidden overscroll-y-none md:h-dvh"
       inert={background}
     >
-      <BackgroundThreadContext value={background}>
+      <BackgroundThreadContext value={background || panePassive}>
         <HiddenThreadContext value={background}>{view}</HiddenThreadContext>
       </BackgroundThreadContext>
       {background ? null : redirect}
-    </SidebarInset>
+    </PaneCellInset>
   );
 }

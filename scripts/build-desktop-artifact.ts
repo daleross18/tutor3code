@@ -2853,6 +2853,8 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
           "Commands you run in T3 Code may need to add events to your calendars.",
         NSScreenCaptureUsageDescription:
           "T3 Code captures the active window when you use the window capture shortcut.",
+        NSAppleEventsUsageDescription:
+          "Tutor3 controls the Spotify app on this Mac when you use the music control.",
         NSCameraUsageDescription:
           "T3 Code lets commands run by terminals and coding agents use the camera.",
         NSMicrophoneUsageDescription:

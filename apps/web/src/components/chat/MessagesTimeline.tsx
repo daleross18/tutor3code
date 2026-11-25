@@ -113,6 +113,7 @@ import {
   type WorkGroupViewState,
   type TimelineRow,
 } from "./timelineRowContext";
+import { LiveTurnTokens } from "../../panes/WorkTokenLabels";
 import { TimelineRowTimestamp, ActivityShimmerOverlay } from "./TimelineRowParts";
 import {
   WorkGroupSection,
@@ -142,6 +143,7 @@ import {
 import { useThreadFindPositionReader } from "./useThreadFindPositionReader";
 import { ThreadActivityAnnouncer } from "./ThreadActivityAnnouncer";
 import { useStableHandoffRuns, useIncrementalTimelineRows, useStableRows } from "./useTimelineRows";
+import { usePullRequestUpdateFold } from "../../panes/usePullRequestUpdateFold";
 import { useClientSettings } from "../../hooks/useSettings";
 
 function timelineListStateFor(identity: string): {
@@ -760,7 +762,11 @@ const ConversationTimeline = memo(function ConversationTimeline({
     toolCallVisibility,
     revealedMessageId,
   });
-  const rows = useStableRows(rawRows, listIdentityKey);
+  const rows = usePullRequestUpdateFold(
+    useStableRows(rawRows, listIdentityKey),
+    visibleExpandedRunIds,
+    activeFindMatch?.entryId ?? null,
+  );
   const matchedApprovalRequestIds = new Set<string>();
   for (const row of pendingApprovalRequestIds.size > 0 ? rows : []) {
     const entries =
@@ -1875,6 +1881,7 @@ function TurnFoldTimelineRow({ row }: { row: Extract<TimelineRow, { kind: "turn-
         >
           <span>
             {row.label}
+            <LiveTurnTokens runId={row.runId} />
             {error ? ` · ${error}` : ""}
           </span>
           {row.expanded ? (

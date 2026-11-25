@@ -12,7 +12,9 @@ import { exposeClerkBridge } from "@clerk/electron/preload";
 import { contextBridge, ipcRenderer, webFrame, webUtils } from "electron";
 
 import * as IpcChannels from "./ipc/channels.ts";
+import * as MusicChannels from "./ipc/forkChannels.ts";
 import { mergeLegacyLocalStorage } from "./legacyLocalStorageMerge.ts";
+import { GET_HOST_DISK_SPACE_CHANNEL } from "./ipc/forkChannels.ts";
 
 const SNAP_SHOT_EVENT_TYPES = new Set([
   "requested",
@@ -136,6 +138,8 @@ contextBridge.exposeInMainWorld("desktopBridge", {
     return () => ipcRenderer.removeListener(IpcChannels.TRACKPAD_SCROLL_END_CHANNEL, handler);
   },
   revealWindow: () => ipcRenderer.invoke(IpcChannels.REVEAL_WINDOW_CHANNEL),
+  setMenuBarUnread: (unread) =>
+    ipcRenderer.invoke(MusicChannels.SET_MENU_BAR_UNREAD_CHANNEL, unread),
   getPrimaryPasteEnabled: () => primaryPasteEnabled,
   getSystemLocale: () => {
     const result = ipcRenderer.sendSync(IpcChannels.GET_SYSTEM_LOCALE_CHANNEL);
@@ -161,6 +165,10 @@ contextBridge.exposeInMainWorld("desktopBridge", {
   setLocalEnvironmentEnabled: (enabled) =>
     ipcRenderer.invoke(IpcChannels.SET_LOCAL_ENVIRONMENT_ENABLED_CHANNEL, enabled),
   getHostEnvironmentId: () => ipcRenderer.invoke(IpcChannels.GET_HOST_ENVIRONMENT_ID_CHANNEL),
+  getHostDiskSpace: () => ipcRenderer.invoke(GET_HOST_DISK_SPACE_CHANNEL),
+  getSpotifyState: () => ipcRenderer.invoke(MusicChannels.GET_SPOTIFY_STATE_CHANNEL),
+  sendSpotifyCommand: (command) =>
+    ipcRenderer.invoke(MusicChannels.SEND_SPOTIFY_COMMAND_CHANNEL, command),
   getClientSettings: () => ipcRenderer.invoke(IpcChannels.GET_CLIENT_SETTINGS_CHANNEL),
   setClientSettings: (settings) =>
     ipcRenderer.invoke(IpcChannels.SET_CLIENT_SETTINGS_CHANNEL, settings),

@@ -69,6 +69,7 @@ import { TimelineSystemDivider } from "./TimelineSystemDivider";
 import { subagentResumedSince } from "./V2LifecycleRow.logic";
 import { Button, InlineButton } from "../ui/button";
 import { T3Wordmark } from "../T3Wordmark";
+import { SubagentWorkTokens } from "../../panes/WorkTokenLabels";
 
 export type { HandoffTimelineRun } from "@t3tools/client-runtime/handoff";
 
@@ -523,6 +524,7 @@ function SubagentTimelineLink(props: {
           {statusLabel}
         </span>
       ) : null}
+      <SubagentWorkTokens parentRef={props.parentRef} subagentId={props.subagentId} />
       <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
         {props.event ? props.event.timestamp : <SubagentElapsed agent={timing} />}
       </span>

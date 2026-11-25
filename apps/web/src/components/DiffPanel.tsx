@@ -115,6 +115,7 @@ import { useReviewFilePatches } from "./diffs/useReviewFilePatches";
 import { DiffFileLoadingBoundary } from "./diffs/DiffFileLoadingBoundary";
 import { DiffFileStatus } from "./diffs/DiffFileStatus";
 import { useThreadRouteRef } from "../hooks/useThreadRouteTarget";
+import { usePaneThreadRef } from "../panes/paneContext";
 import { projectCommitUrl } from "@t3tools/client-runtime/change-request-links";
 import { useOpenLink } from "../browser/useOpenLink";
 
@@ -246,7 +247,7 @@ export default function DiffPanel({
   // The open commit menu keeps the list it opened with, so rows do not move under the pointer.
   const [openCommitMenu, setOpenCommitMenu] = useState<ReviewBranchCommitsResult | null>(null);
 
-  const routeThreadRef = useThreadRouteRef();
+  const routeThreadRef = usePaneThreadRef(useThreadRouteRef());
   const activeThreadId = routeThreadRef?.threadId ?? null;
   const activeThread = useQuietThreadShell(routeThreadRef);
   const fileAccess = useFilesystemReadAccess(activeThread?.environmentId ?? null, messages);

@@ -25,6 +25,7 @@ import {
 } from "@t3tools/contracts";
 import { type ReviewCommentContext } from "../../reviewCommentContext";
 import { composerTargetKey } from "../../composerDraftStore";
+import { resumePromptHistoryPosition } from "../../panes/promptHistoryMemory";
 import {
   type ComposerListEdit,
   listContinuationForEnter,
@@ -177,7 +178,10 @@ export function composerCommandKeyHandler(input: {
       return false;
     }
     const recalled = promptHistoryPositionRef.current;
-    const position = recalled?.targetKey === promptHistoryTargetKey ? recalled.position : null;
+    const position = resumePromptHistoryPosition(
+      recalled?.targetKey === promptHistoryTargetKey ? recalled.position : null,
+      promptRef.current,
+    );
     if (position === null && promptRef.current.length > 0) {
       return false;
     }

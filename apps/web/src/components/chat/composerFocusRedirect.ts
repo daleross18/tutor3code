@@ -1,4 +1,5 @@
 import { surfaceShortcutKey } from "~/lib/surfaceShortcutKey";
+import { isInPassivePane } from "../../panes/paneDom";
 
 export const TYPE_TO_FOCUS_EDITABLE_SELECTOR = [
   "input",
@@ -51,8 +52,8 @@ const SURFACE_LAUNCHER_KEYS_ATTRIBUTE = "data-surface-launcher-keys";
 // mounts. When the panel opens after page load that listener runs after ours,
 // so we must leave its letters alone or the composer takes them first.
 function isSurfaceLauncherKey(event: KeyboardEvent): boolean {
-  const launcherKeys = document
-    .querySelector(`[${SURFACE_LAUNCHER_KEYS_ATTRIBUTE}]`)
+  const launcherKeys = Array.from(document.querySelectorAll(`[${SURFACE_LAUNCHER_KEYS_ATTRIBUTE}]`))
+    .find((launcher) => !isInPassivePane(launcher))
     ?.getAttribute(SURFACE_LAUNCHER_KEYS_ATTRIBUTE)
     ?.toLowerCase();
   const key = surfaceShortcutKey(event);
@@ -78,7 +79,12 @@ export function shouldRedirectInputToComposer(event: Event): boolean {
   if (eventPathContainsSelector(event, TYPE_TO_FOCUS_EDITABLE_SELECTOR)) return false;
   if (eventPathContainsSelector(event, TYPE_TO_FOCUS_INTERACTIVE_SELECTOR)) return false;
   if (document.querySelector(TYPE_TO_FOCUS_FLOATING_LAYER_SELECTOR)) return false;
-  if (document.querySelector('[data-chat-column-maximized-away="true"]')) return false;
+  if (
+    Array.from(document.querySelectorAll('[data-chat-column-maximized-away="true"]')).some(
+      (column) => !isInPassivePane(column),
+    )
+  )
+    return false;
   return true;
 }
 

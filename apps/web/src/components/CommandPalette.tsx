@@ -254,6 +254,7 @@ import {
   sourceControlHostIcon,
 } from "./CommandPaletteAddProject";
 import { useCommandPaletteThreadItems } from "./CommandPaletteThreadItems";
+import { usePaletteFilter } from "../panes/usePaletteFilter";
 import { useCommandPaletteThemeItems } from "./CommandPaletteThemeItems";
 import {
   PORT_FORWARD_GROUP_PREFIX,
@@ -964,7 +965,11 @@ function OpenCommandPaletteDialog(props: {
     now: searchNow,
     isSearchPending: isThreadSearchPending,
     isSearchFailed: isThreadSearchFailed,
-  } = useCommandPaletteThreadItems({ activeThread: activeThread ?? null, threadSearchQuery });
+    paletteFilter,
+  } = usePaletteFilter(
+    useCommandPaletteThreadItems({ activeThread: activeThread ?? null, threadSearchQuery }),
+    { available: paletteMode === "root", projectGroups },
+  );
   // Recent means used recently: written in or opened, whichever is later. The
   // open thread would always lead that list, so it is left out.
   const activeThreadValue = activeThread
@@ -1917,7 +1922,7 @@ function OpenCommandPaletteDialog(props: {
             },
           }
         : {}),
-      projectSearchItems: projectSearchItems,
+      projectSearchItems: paletteFilter.narrow(projectSearchItems),
       settingsSearchItems,
       threadSearchItems:
         isLinkedThreadSearch && linkedThreadSearch?.linkedThreads
@@ -3079,7 +3084,7 @@ function OpenCommandPaletteDialog(props: {
       autoHighlight={autoHighlightsFirstRow ? "always" : false}
       footerActionLabel={footerActionLabel}
       footerTrailing={footerTrailing}
-      inputAccessory={inputAccessory}
+      inputAccessory={inputAccessory ?? paletteFilter.accessory}
       inputProps={{
         className: hasHighlightedNewProjectItem
           ? "*:data-[slot=autocomplete-input]:pe-38!"
@@ -3109,7 +3114,10 @@ function OpenCommandPaletteDialog(props: {
           : isBrowsing
             ? { startAddon: <FolderPlusIcon /> }
             : {}),
-        onKeyDown: handleKeyDown,
+        onKeyDown: (event) => {
+          if (!paletteFilter.takeKey(event)) handleKeyDown(event);
+        },
+        ...paletteFilter.inputProps,
       }}
       mode="none"
       items={resultRows.itemValues}

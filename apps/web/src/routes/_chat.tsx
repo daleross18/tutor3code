@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
-import { ThreadRouteView } from "../components/ThreadRouteView";
+import { PaneHost } from "../panes/PaneHost";
 import { GlobalVoiceInputIndicator } from "../components/chat/GlobalVoiceInputIndicator";
 import { isAppModalPage } from "../components/sidebar/mainAppLocation";
 import { SidebarInset } from "../components/ui/sidebar";
@@ -18,7 +18,7 @@ function ChatRouteLayout() {
         <ThreadLinkPrompt threadRef={shownTarget.threadRef} />
       ) : null}
       {shownTarget ? (
-        <ThreadRouteView target={shownTarget} background={modalOpen} />
+        <PaneHost target={shownTarget} background={modalOpen} />
       ) : modalOpen ? (
         <SidebarInset className="h-dvh" />
       ) : (

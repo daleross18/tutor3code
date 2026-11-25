@@ -12,6 +12,7 @@ import {
 } from "./BranchToolbar.logic";
 import { useComposerMenuProps } from "./chat/composerEventScope";
 import { PreviousWorktreeItemContent } from "./PreviousWorktreeItemContent";
+import { paneWorktreeLabel } from "../panes/worktreeLabel";
 import {
   Select,
   SelectGroup,
@@ -89,7 +90,9 @@ export const BranchToolbarEnvModeSelector = memo(function BranchToolbarEnvModeSe
         <ComposerContextLabel>
           {forceNewWorktree
             ? resolveEnvModeLabel("worktree", m)
-            : resolveLockedWorkspaceLabel(activeWorktreePath, effectiveEnvMode, m)}
+            : paneWorktreeLabel(
+                resolveLockedWorkspaceLabel(activeWorktreePath, effectiveEnvMode, m),
+              )}
         </ComposerContextLabel>
       </span>
     );

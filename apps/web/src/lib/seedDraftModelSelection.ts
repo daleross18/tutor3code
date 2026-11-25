@@ -7,6 +7,7 @@ import { resolveProjectDefaultProviderModelSelection } from "../providerInstance
 import { readProject } from "../state/entities";
 import { readEnvironment, readEnvironmentProviders } from "../state/environments";
 import { hasExplicitComposerModelSelection } from "./chatThreadActions";
+import { pickNewThreadAccount } from "../panes/newThreadAccount";
 
 /** Gives a draft that moved project or machine the model a new thread there would start with. */
 export function seedDraftModelSelection(draftId: DraftId, projectRef: ScopedProjectRef): void {
@@ -32,6 +33,7 @@ export function seedDraftModelSelection(draftId: DraftId, projectRef: ScopedProj
     projectId: projectRef.projectId,
     now: Date.now(),
   });
-  const selection = resolution.fallback ? resolution.selection : defaultSelection;
+  const stockSelection = resolution.fallback ? resolution.selection : defaultSelection;
+  const selection = pickNewThreadAccount(stockSelection, draftId, projectRef);
   if (selection) store.setModelSelection(draftId, selection, { replaceOptions: true });
 }

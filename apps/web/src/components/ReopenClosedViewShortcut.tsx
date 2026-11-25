@@ -47,6 +47,7 @@ import {
 } from "../threadRoutes";
 import { toastManager } from "./ui/toast";
 import { readIssueListPreferences } from "./issue/issueListPreferences";
+import { usePreviewForwardedPaneShortcuts } from "../panes/previewPaneKeys";
 
 const PREVIEW_FORWARDED_COMMANDS = [
   "workspace.focusNext",
@@ -203,6 +204,7 @@ export function ReopenClosedViewShortcut() {
     };
   }, [keybindings, previewOpen, terminalOpen]);
 
+  const paneShortcuts = usePreviewForwardedPaneShortcuts(keybindings);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- registers forwarded shortcut chords with the desktop preview bridge and clears them on cleanup
   useEffect(() => {
     const preview = window.desktopBridge?.preview;
@@ -225,19 +227,20 @@ export function ReopenClosedViewShortcut() {
       ...PREVIEW_FORWARDED_COMMANDS,
     ];
     void preview
-      .setForwardedShortcuts(
-        commands.flatMap((command) =>
+      .setForwardedShortcuts([
+        ...commands.flatMap((command) =>
           effectiveShortcutsForCommand(keybindings, command, options).map((shortcut) => ({
             command,
             shortcut,
           })),
         ),
-      )
+        ...paneShortcuts,
+      ])
       .catch(() => undefined);
     return () => {
       void preview.setForwardedShortcuts([]).catch(() => undefined);
     };
-  }, [hasHistory, keybindings, terminalOpen]);
+  }, [hasHistory, keybindings, paneShortcuts, terminalOpen]);
 
   return null;
 }

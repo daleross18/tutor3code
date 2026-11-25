@@ -16,6 +16,7 @@ import { writeLocalStorageValue } from "../../hooks/useLocalStorage";
 import type { MessageResolver } from "../../i18n/messages";
 import { commandLabel } from "./KeybindingsSettings.logic";
 import type { ResolvedSettingsScope } from "./settingsScope";
+import { PANE_SETTINGS_SEARCH_ITEMS } from "../../panes/paneSettingsSearch";
 
 export type SettingsPath =
   | "/settings/projects"
@@ -367,6 +368,7 @@ export const SETTINGS_SEARCH_ITEMS = [
     to: "/settings/appearance",
     searchTerms: [msg("wide full width column layout messages composer monitor")],
   },
+  ...PANE_SETTINGS_SEARCH_ITEMS,
   {
     id: "thread-details-items",
     title: msg("Thread details"),

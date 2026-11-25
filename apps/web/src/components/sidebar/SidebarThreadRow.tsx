@@ -83,6 +83,7 @@ import { useEnvironmentQuery } from "../../state/query";
 import { readEnvironmentScope, useEnvironmentScope } from "../../state/session";
 import { formatRelativeTime, parseTimestampDate } from "../../timestampFormat";
 import type { SidebarThreadSummary } from "../../types";
+import { ThreadCiStatus } from "../../panes/ThreadCiStatus";
 import type { EnvironmentProject } from "@t3tools/client-runtime/state/shell";
 import { cn } from "~/lib/utils";
 import { textDirection } from "~/textDirection";
@@ -1294,6 +1295,7 @@ const SidebarThreadRow = memo(function SidebarThreadRow(props: SidebarThreadRowP
       )}
       {terminalStatusIcon}
       {prBadge}
+      <ThreadCiStatus thread={thread} />
       {issueBadge}
       {diff ? (
         <span className="shrink-0 font-mono">

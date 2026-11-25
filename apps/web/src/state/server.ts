@@ -24,6 +24,7 @@ import { AsyncResult, Atom } from "effect/reactivity";
 import { isConnectedWithConfig } from "../components/settings/scopedSettings";
 import { environmentCatalog } from "../connection/catalog";
 import { connectionAtomRuntime } from "../connection/runtime";
+import { withPaneKeybindings } from "../panes/paneKeybindings";
 import { environmentAtomList } from "./environmentAtomList";
 import { primaryEnvironmentIdAtom, localEnvironmentIdAtom } from "./primaryEnvironment";
 import { environmentSession } from "./session";
@@ -131,7 +132,7 @@ export function createShortcutKeybindingsAtom(input: {
     return environments.find(isConnectedWithConfig)?.serverConfig?.keybindings ?? null;
   });
   return Atom.make((get): ServerConfig["keybindings"] =>
-    mergeWithDefaultKeybindings(get(customAtom) ?? []),
+    withPaneKeybindings(mergeWithDefaultKeybindings(get(customAtom) ?? [])),
   );
 }
 

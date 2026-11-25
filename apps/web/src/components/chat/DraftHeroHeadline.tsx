@@ -48,6 +48,10 @@ import { InlineButton } from "../ui/button";
 import { DraftProjectName } from "./DraftProjectName";
 import { DraftHeroProjectHeading } from "./DraftHeroProjectHeading";
 import { TriageDraftHero } from "./TriageDraftHero";
+import {
+  DraftEnvironmentChoice,
+  useDraftEnvironmentProjects,
+} from "../../panes/DraftEnvironmentChoice";
 
 const ADD_PROJECT_VALUE = "add-project";
 
@@ -123,7 +127,7 @@ export function DraftHeroHeadline({
   const hasResolvedProject = activeProjectTitle !== null;
   const canChooseProject = projectPickerEntries.length > 0;
   const shouldShowProjectMenu = canChooseProject;
-  const menuEntries = projectPickerEntries.filter(
+  const menuEntries = useDraftEnvironmentProjects(projectPickerEntries, activeProjectRef).filter(
     ({ targetProject }) =>
       !isScratchProject(targetProject, scratchWorkspaceRootFor(targetProject.environmentId)),
   );
@@ -332,7 +336,11 @@ export function DraftHeroHeadline({
               onClick={() =>
                 void startScratch().then((started) => {
                   if (started) {
-                    document.querySelector<HTMLElement>("[data-draft-project-trigger]")?.focus();
+                    document
+                      .querySelector<HTMLElement>(
+                        '[data-draft-project-trigger]:not([data-pane-focused="false"] *)',
+                      )
+                      ?.focus();
                   }
                 })
               }
@@ -376,6 +384,11 @@ export function DraftHeroHeadline({
           )}
         </h1>
       )}
+      <DraftEnvironmentChoice
+        draftId={draftId}
+        activeProjectRef={activeProjectRef}
+        entries={projectPickerEntries}
+      />
       {scratchWorkspaceRoot === null ? null : (
         <p className="mt-2 flex h-6 w-full items-center justify-center text-sm">
           {isScratchDraft ? projectSelector : orStartWithoutProject}

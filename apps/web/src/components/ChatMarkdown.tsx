@@ -200,6 +200,7 @@ import { sourceControlClients } from "@t3tools/client-runtime/source-control-cli
 import { useOpenChangeRequestLink } from "~/lib/openPullRequestLink";
 import { textDirection } from "~/textDirection";
 import { useOpenLink } from "../browser/useOpenLink";
+import { artifactLinkProfile, openArtifactLinkInApp } from "../panes/openArtifactLink";
 import { writeTextToClipboard } from "../hooks/useCopyToClipboard";
 import { isPreviewAvailableFor } from "../browser/previewRuntime";
 import {
@@ -781,7 +782,12 @@ function useChatMarkdownState({
         ),
       );
     }
-    return openUrlInPreview({ threadRef, url, openPreview }).then((result) => {
+    return openUrlInPreview({
+      threadRef,
+      url,
+      openPreview,
+      ...artifactLinkProfile(threadRef, url),
+    }).then((result) => {
       if (result._tag === "Success") recordVisitForThread(threadRef, url);
       else if (!isAtomCommandInterrupted(result)) {
         const error = squashAtomCommandFailure(result);
@@ -1350,6 +1356,7 @@ const CHAT_MARKDOWN_COMPONENTS = {
               return;
             }
             if (event.defaultPrevented) return;
+            if (openArtifactLinkInApp(event, href, threadRef)) return;
             if (
               resolveLinkTarget({
                 url: href,

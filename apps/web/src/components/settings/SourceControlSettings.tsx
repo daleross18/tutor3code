@@ -655,7 +655,8 @@ export function SourceControlSettingsPanel() {
           onScan={handleScan}
         />
       )}
-      {environmentId === null ? null : (
+      {environmentId === null ||
+      environment?.serverConfig?.environment.capabilities.issues !== true ? null : (
         <IssueTrackerSettings key={environmentId} environmentId={environmentId} />
       )}
 

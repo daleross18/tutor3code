@@ -33,8 +33,8 @@ function Probe({
 const press = (repeat = false) =>
   window.dispatchEvent(
     new KeyboardEvent("keydown", {
-      key: "D",
-      code: "KeyD",
+      key: "U",
+      code: "KeyU",
       ctrlKey: !/Mac/i.test(navigator.platform),
       metaKey: /Mac/i.test(navigator.platform),
       shiftKey: true,
@@ -87,9 +87,9 @@ it("finishes a released hold after startup even if the chord was pressed again w
   await screen.rerender(
     <Probe speech={{ ...speech, state: { ...speech.state, phase: "preparing" } }} />,
   );
-  window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyD" }));
+  window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyU" }));
   press();
-  window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyD" }));
+  window.dispatchEvent(new KeyboardEvent("keyup", { code: "KeyU" }));
   finishStart();
   await startup;
   expect(speech.start).toHaveBeenCalledOnce();

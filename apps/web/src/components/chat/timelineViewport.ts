@@ -1,6 +1,7 @@
 import { readHtmlRenderContentHeight } from "@t3tools/shared/htmlRender";
 
 import { isInSideChatPane } from "../../lib/sideChatPane";
+import { isInPassivePane } from "../../panes/paneDom";
 import { registerCommands } from "../../shortcuts/dispatcher";
 import {
   eventPathContainsSelector,
@@ -110,7 +111,8 @@ export function attachTimelineViewport(
       !(event.target instanceof Node) ||
       (!scrollNode.contains(event.target) &&
         ((event.target !== document.body && event.target !== document.documentElement) ||
-          isInSideChatPane(scrollNode))) ||
+          isInSideChatPane(scrollNode) ||
+          isInPassivePane(scrollNode))) ||
       event.isComposing ||
       event.altKey ||
       event.ctrlKey ||

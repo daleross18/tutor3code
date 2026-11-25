@@ -26,6 +26,7 @@ import { startMainAppLocationTracking } from "./components/sidebar/mainAppLocati
 import { startDesktopUpdateLaunchNotice } from "./components/sidebar/updateEverythingRun";
 import { startSlowRpcRequestToasts } from "./components/SlowRpcRequestToastCoordinator";
 import { startThreadNotifications } from "./components/ThreadNotificationCoordinator";
+import { startPullRequestWatchHoldSetting } from "./panes/pullRequestWatchHold";
 import { startGuideRunNotifications } from "./components/pullRequest/guide/PullRequestGuideRunCoordinator";
 import { APP_BASE_NAME, APP_DISPLAY_NAME, APP_STAGE_LABEL } from "./branding";
 import { resolveServerBackedAppDisplayName, resolveWindowTitle } from "./branding.logic";
@@ -36,6 +37,7 @@ import {
   useComposerDraftStore,
 } from "./composerDraftStore";
 import { startDefaultThemeAdoption } from "./hooks/useDefaultTheme";
+import { adoptTutorTheme } from "./panes/tutorTheme";
 import { startEnvironmentThemeRepaint } from "./hooks/useEnvironmentTheme";
 import { startThemeBackground } from "./themeBackground";
 import { readLocalStorageValue, subscribeLocalStorageKey } from "./hooks/useLocalStorage";
@@ -47,6 +49,7 @@ import {
 } from "./hooks/useSettings";
 import { syncBrowserChromeTheme } from "./hooks/useTheme";
 import { startThreadVisitedMigration } from "./hooks/useThreadVisitedMigration";
+import { startFinishedThreadSignals } from "./panes/finishedThreadSignals";
 import { installDesktopPasteAsText } from "./lib/desktopPasteAsText";
 import {
   syncDocumentElectronPlatformClasses,
@@ -275,7 +278,9 @@ export function startAppServices(): AppRouter {
   startEnvironmentThemeRepaint();
   startThemeBackground();
   startBrowserChromeThemeSync(router);
+  adoptTutorTheme();
   startDefaultThemeAdoption();
+  startPullRequestWatchHoldSetting();
   startModelPreferencesMigration();
   startAgentOpenedPreviews();
   if (isElectron) startElectronBrowserHost();
@@ -302,6 +307,7 @@ export function startAppServices(): AppRouter {
   startWorkspaceFocus(router);
   startBackgroundThreadAnnouncements(appAtomRegistry, router);
   startThreadVisitedMigration(appAtomRegistry);
+  startFinishedThreadSignals(appAtomRegistry, router);
   startSshPasswordPromptQueue();
 
   startKeybindingsUpdateToasts();

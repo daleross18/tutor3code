@@ -73,6 +73,7 @@ import { primaryServerKeybindingsAtom } from "~/state/server";
 import { PreviewAnnotationSpeech } from "./PreviewAnnotationSpeech";
 import { previewBridge } from "./previewBridge";
 import { subscribePreviewAction } from "./previewActionBus";
+import { isInPassivePane } from "../../panes/paneDom";
 import { closePreviewSession } from "./closePreviewSession";
 import { openPreviewSession } from "./openPreviewSession";
 import { showPreviewPopup } from "./showPreviewPopup";
@@ -941,6 +942,7 @@ export function PreviewView({
   // Subscribe only while visible; ChatView always owns URL-aware toggle-panel handling.
   const onPreviewAction = useEffectEvent(
     (action: Parameters<Parameters<typeof subscribePreviewAction>[0]>[0]) => {
+      if (isInPassivePane(urlInputRef.current)) return;
       switch (action) {
         case "refresh":
           handleRefresh();

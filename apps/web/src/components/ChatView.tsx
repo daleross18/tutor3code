@@ -141,7 +141,8 @@ import {
 } from "react";
 import { BackgroundThreadContext } from "./chat/backgroundThread";
 import { WorkspaceMutationIdContext } from "./chat/ChatMarkdownMedia";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useLocation } from "../panes/paneNavigation";
 import {
   assistantCitationFromLocation,
   useSideChatCitationReveal,
@@ -205,6 +206,7 @@ import { LinkPullRequestDialogHost } from "./pullRequest/LinkPullRequestDialog";
 import { GuestPendingMessages } from "./chat/GuestShareControls";
 import { useDeviceState } from "~/state/device";
 import { BranchToolbar, type BranchToolbarHandle } from "./BranchToolbar";
+import { usePaneKeepsContextStrip } from "../panes/paneContextStrip";
 import { ComposerContextPermissions } from "./ComposerContextPermissions";
 import { makeWorkspaceFileDropHandlers } from "./chat/workspaceFileDrop";
 import { isEditableFocused } from "../lib/editableFocus";
@@ -234,6 +236,7 @@ import {
 import { useNowMinute } from "../hooks/useNowMinute";
 import { usePanelAnimationSettings, usePanelPresence } from "../panelAnimations";
 import { useNewThreadHandler } from "../hooks/useHandleNewThread";
+import { usePaneNewThreadHandler } from "../panes/paneNavigation";
 import { useOpenPanelPullRequestUrl } from "../hooks/useOpenPanelPullRequestUrl";
 import { isPreviewFocused } from "../lib/previewFocus";
 import { getTerminalFocusOwner } from "../lib/terminalFocus";
@@ -291,7 +294,10 @@ import {
 import { useEnvironmentShellHasSnapshot } from "../state/shell";
 import { ChatComposer, type ChatComposerHandle } from "./chat/ChatComposer";
 import { DraftHeroHeadline } from "./chat/DraftHeroHeadline";
+import { panePanelShortcuts, usePaneNarrow, usePaneScrollToEnd } from "../panes/paneContext";
+import { paneNarrowSideChatReason } from "../panes/paneNarrowPanel";
 import { ExpandedImageDialogHost, openExpandedImagePreview } from "./chat/ExpandedImageDialog";
+import { usePaneStopTurn } from "../panes/usePaneStopTurn";
 import {
   BranchRestoreConfirmHost,
   DeviceSetupDialogHost,
@@ -302,6 +308,7 @@ import {
 import type { AssistantCitationRequest } from "./chat/AssistantCitationSource";
 import { useCitedHistory } from "./chat/citationProcedure";
 import type { MessagesTimelineHistoryControls } from "./chat/MessagesTimeline";
+import { usePaneMessageJump } from "../panes/usePaneMessageJump";
 import { ThreadTimeline } from "./chat/ThreadTimeline";
 import { NativeChildWorkDialog } from "./chat/NativeChildWorkDialog";
 import { ProviderSubagentBar } from "./chat/ProviderSubagentBar";
@@ -463,7 +470,7 @@ export default function ChatView(props: ChatViewProps) {
   const canOperateThread = useEnvironmentScope(environmentId, AuthOrchestrationOperateScope);
   const canOperateTerminal = useEnvironmentScope(environmentId, AuthTerminalOperateScope);
   const draftId = routeKind === "draft" ? props.draftId : null;
-  const handleNewThread = useNewThreadHandler();
+  const handleNewThread = usePaneNewThreadHandler(useNewThreadHandler());
   const routeThreadRef = scopeThreadRef(environmentId, threadId);
   const routeThreadKey = scopedThreadKey(routeThreadRef);
   const currentRouteThreadKeyRef = useRef<string | null>(routeThreadKey);
@@ -1121,7 +1128,8 @@ export default function ChatView(props: ChatViewProps) {
   );
   const canReuseTerminal = activeThreadKnownSessionsRaw !== null;
   const previewPanelOpen = activeRightPanelKind === "preview" && browserAvailable;
-  const rightPanelOpen = rightPanelState.isOpen;
+  const paneNarrow = usePaneNarrow(activeThreadRef);
+  const rightPanelOpen = rightPanelState.isOpen && !paneNarrow;
   const { active: panelAnimationsActive, durationMs: panelAnimationDurationMs } =
     usePanelAnimationSettings();
   const rightPanelPresenceValue = {
@@ -1815,11 +1823,12 @@ export default function ChatView(props: ChatViewProps) {
           providerSubagentModels,
           reportedModelSelection,
         );
+  const paneKeepsContextStrip = usePaneKeepsContextStrip();
   const showComposerContextStrip =
     !embedded &&
     shouldShowComposerContextStrip({
       isDraftHeroState,
-      persistInActiveThreads: settings.persistComposerContextStrip,
+      persistInActiveThreads: settings.persistComposerContextStrip || paneKeepsContextStrip,
       hasActiveProject: activeProject !== null && !showProviderSubagentBar,
       isGitRepo,
       showEnvironmentIndicator: showComposerEnvironmentIndicator,
@@ -1904,8 +1913,11 @@ export default function ChatView(props: ChatViewProps) {
   const onInterruptStable = useStableCallback(onInterrupt);
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- window listener for the desktop snapshot event that focuses the composer
   useEffect(
-    () => (embedded ? undefined : subscribeSnapShotComposerFocus(focusComposerStable)),
-    [embedded, focusComposerStable],
+    () =>
+      embedded || backgroundThread
+        ? undefined
+        : subscribeSnapShotComposerFocus(focusComposerStable),
+    [embedded, backgroundThread, focusComposerStable],
   );
   const insertArtifactTemplate = (template: CodexArtifactTemplate) => {
     const composer = composerRef.current;
@@ -2062,7 +2074,8 @@ export default function ChatView(props: ChatViewProps) {
   const activeRunningTurnId = activeRuntime?.activeRunId ?? null;
   useProactivePanels({
     threadRef: isServerThread && !embedded ? activeThreadRef : null,
-    enabled: settings.proactivePanelsEnabled && !shouldUsePlanSidebarSheet && !embedded,
+    enabled:
+      settings.proactivePanelsEnabled && !shouldUsePlanSidebarSheet && !embedded && !paneNarrow,
     settingsHydrated: clientSettingsHydrated,
     threadDetailLoading,
     runningTurnId: activeRunningTurnId,
@@ -2203,6 +2216,7 @@ export default function ChatView(props: ChatViewProps) {
   useEffect(() => {
     if (
       embedded ||
+      backgroundThread ||
       !activeThread?.id ||
       terminalUiState.terminalOpen ||
       isMobileViewport ||
@@ -2235,6 +2249,7 @@ export default function ChatView(props: ChatViewProps) {
   }, [
     activeThread?.id,
     embedded,
+    backgroundThread,
     focusComposerStable,
     isCoarsePointer,
     isMobileViewport,
@@ -2448,7 +2463,7 @@ export default function ChatView(props: ChatViewProps) {
     pullRequestPanelTarget,
     threadPanelPresentation,
     isServerThread,
-    embedded,
+    embedded: embedded || backgroundThread || paneNarrow,
     isGitRepo,
     browserAvailable,
     canOperatePreview,
@@ -2807,7 +2822,7 @@ export default function ChatView(props: ChatViewProps) {
     },
     commands: {
       ...terminalShortcuts,
-      ...rightPanelShortcuts,
+      ...panePanelShortcuts(rightPanelShortcuts, paneNarrow),
       ...threadLifecycleShortcuts,
       "thread.copyReference": ({ event }) => {
         if (!event.repeat) copyActiveThreadReference();
@@ -2853,7 +2868,7 @@ export default function ChatView(props: ChatViewProps) {
   // A focused desktop browser page forwards these chords as menu actions.
   // oxlint-disable-next-line t3code/no-unreasoned-state-sync -- subscribes to desktop bridge menu actions that toggle or close the right panel
   useEffect(() => {
-    if (embedded || backgroundThread) return;
+    if (embedded || backgroundThread || paneNarrow) return;
     return window.desktopBridge?.onMenuAction((action) => {
       if (action === "rightPanel.toggle") toggleRightPanelStable();
       else if (action === "rightPanel.toggleMaximized") toggleRightPanelMaximizedStable();
@@ -2862,12 +2877,13 @@ export default function ChatView(props: ChatViewProps) {
   }, [
     embedded,
     backgroundThread,
+    paneNarrow,
     toggleRightPanelStable,
     toggleRightPanelMaximizedStable,
     closeActiveRightPanelSurfaceStable,
   ]);
 
-  usePasteToFocusComposer(embedded ? null : activeThreadId, composerRef);
+  usePasteToFocusComposer(embedded || backgroundThread ? null : activeThreadId, composerRef);
   // A delegated task is a remote thread's subagent.
   const isSubagentThread =
     activeThread?.lineage.relationshipToParent === "subagent" || delegatedFrom !== null;
@@ -2911,7 +2927,7 @@ export default function ChatView(props: ChatViewProps) {
                     serverProjection?.runs ?? [],
                   )
                 ? gt("Available once the thread's worktree is set up.")
-                : null;
+                : paneNarrowSideChatReason(paneNarrow);
   const openSideChatStable = useStableCallback(() => void sideChat.open());
   const sendSideChatStable = useStableCallback(sideChat.open);
   const { onConfirmRevertStable, onForkFromRunStable, onRevertTimelineTurnStable } =
@@ -2934,6 +2950,35 @@ export default function ChatView(props: ChatViewProps) {
       composerDraftTarget,
       setThreadError,
     });
+  usePaneStopTurn(
+    {
+      environmentId,
+      routeThreadRef,
+      routeThreadKey,
+      serverProjection,
+      activeThread,
+      activeRunningTurnId,
+      activeActivityRun,
+      canInterruptRunningThread,
+      onInterruptStable,
+      promptRef,
+      composerRef,
+      composerDraftTarget,
+      setThreadError,
+      phase,
+      isSendBusy,
+      sendInFlightRef,
+      optimisticUserMessages,
+      supportsConversationRollback,
+      activeEnvironmentUnavailable,
+      serverVisibleTurnItems,
+      timelineEntries,
+      turnDiffSummaries,
+      availableRevertTurnCounts,
+      threadStartCheckpointAvailable,
+    },
+    !embedded && !backgroundThread,
+  );
   const onCompactContext = () => {
     if (compactDisabled) return;
     void sendStandaloneCommand("/compact", gt("Failed to compact context."));
@@ -2965,6 +3010,16 @@ export default function ChatView(props: ChatViewProps) {
     setPendingServerThreadStartFromOriginByThreadId,
     scheduleComposerFocus: scheduleComposerFocusStable,
   });
+  const attachPaneTimelineViewport = usePaneMessageJump(
+    {
+      legendListRef,
+      threadHistoryControls,
+      routeThreadKey,
+      scrollToEnd,
+      attachTimelineViewport,
+    },
+    !embedded && !backgroundThread,
+  );
   const { onResume, isResuming } = useComposerResume({
     environmentId,
     routeThreadKey,
@@ -3197,6 +3252,7 @@ export default function ChatView(props: ChatViewProps) {
         message.inputIntent === "queued_turn" &&
         !serverProjection?.messages.some((committed) => committed.id === message.id),
     );
+  usePaneScrollToEnd(scrollToEnd, !embedded && !backgroundThread);
   const scrollToEndSummary =
     [
       childInputNow?.waitingLabel ?? null,
@@ -3370,6 +3426,7 @@ export default function ChatView(props: ChatViewProps) {
     <PanelLayoutControls
       {...panelToggleControlProps}
       showThreadPanelControl={!inlineRightPanelOwnsTitleBar}
+      showRightPanelControl={!paneNarrow}
     />
   );
   const threadPanelHeaderControl = <ThreadPanelHeaderControl {...panelToggleControlProps} />;
@@ -3595,7 +3652,7 @@ export default function ChatView(props: ChatViewProps) {
                   contentInsetEndAdjustment={composerTimelineInset}
                   liveFollowEnabled={timelineLiveFollowEnabled}
                   onIsAtEndChange={onIsAtEndChangeStable}
-                  onViewportAttach={attachTimelineViewport}
+                  onViewportAttach={attachPaneTimelineViewport}
                   onFooterGrow={onTimelineFooterGrowStable}
                   hideEmptyPlaceholder={isDraftHeroState || threadDetailLoading}
                   emptyPlaceholderInset={composerReservedHeight}
@@ -4129,7 +4186,7 @@ export default function ChatView(props: ChatViewProps) {
         worktreePath={activeThread?.worktreePath ?? null}
         onConfirm={onConfirmRevertStable}
       />
-      {embedded ? null : <LinkPullRequestDialogHost />}
+      {embedded || backgroundThread ? null : <LinkPullRequestDialogHost />}
       <ThreadVisitWatermark threadRef={routeThreadRef} />
       <ExpandedImageDialogHost threadKey={routeThreadKey} />
     </div>

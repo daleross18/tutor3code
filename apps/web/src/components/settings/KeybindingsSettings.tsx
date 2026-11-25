@@ -44,6 +44,7 @@ import {
 import { isElectron } from "../../env";
 import { useOpenInPreferredEditor } from "../../editorPreferences";
 import { formatShortcutLabel } from "../../keybindings";
+import { paneKeybindingTargets, withoutDeadPaneChords } from "../../panes/paneKeybindings";
 import { cn } from "../../lib/utils";
 import { serverEnvironment } from "../../state/server";
 import { useSettingsScope } from "./SettingsScopeContext";
@@ -1427,7 +1428,7 @@ function keybindingAnchorIds(rows: ReturnType<typeof buildKeybindingRows>) {
 // Cache rows in a separate hook so the compiler does not rebuild them per search keystroke.
 function useKeybindingCatalog() {
   const serverKeybindings = useSettingsScope().environment?.serverConfig?.keybindings;
-  const merged = mergeWithDefaultKeybindings(serverKeybindings ?? []);
+  const merged = withoutDeadPaneChords(mergeWithDefaultKeybindings(serverKeybindings ?? []));
   const m = useMessages();
   return {
     commandOptions: buildKeybindingCommandOptions(merged, m),
@@ -1518,7 +1519,7 @@ export function KeybindingsSettingsPanel() {
     };
     void (async () => {
       const results = await Promise.all(
-        connectedEnvironments.map((target) =>
+        paneKeybindingTargets(input.command, connectedEnvironments).map((target) =>
           upsertKeybinding({ environmentId: target.environmentId, input: payload }),
         ),
       );
@@ -1553,7 +1554,7 @@ export function KeybindingsSettingsPanel() {
     setSavingCommand(row.command);
     void (async () => {
       const results = await Promise.all(
-        connectedEnvironments.map((target) =>
+        paneKeybindingTargets(row.command, connectedEnvironments).map((target) =>
           removeKeybindingMutation({
             environmentId: target.environmentId,
             input: rowKeybindingTarget(row),

@@ -164,8 +164,8 @@ import {
 import {
   type ComposerCitationCommentRequest,
   type ComposerPromptEditorHandle,
-  ComposerPromptEditorTiptap as ComposerPromptEditor,
 } from "../ComposerPromptEditorTiptap";
+import { PasteCollapseEditor as ComposerPromptEditor } from "../../panes/PasteCollapseEditor";
 import {
   ComposerContextActionsContext,
   composerContextRecordsFromDraft,
@@ -291,7 +291,9 @@ import {
 } from "./preparingComposerImages";
 import { ComposerControlsBar } from "./ComposerControlsBar";
 import { composerCommandKeyHandler } from "./composerCommandKey";
+import { promptHistoryFor, useRememberPromptHistory } from "../../panes/promptHistoryMemory";
 import { usePromptSuggestion } from "./usePromptSuggestion";
+import { useSelectionInputOffer } from "../../panes/useSelectionInputOffer";
 import { useFreshSessionArmed } from "./freshSessionArms";
 
 function consumePasteAsTextShortcut(deadline: { current: number }): boolean {
@@ -2384,7 +2386,20 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     !showProviderUnavailable
       ? promptSuggestion
       : null;
+  const selectionInputOffer = useSelectionInputOffer({
+    formRef: composerFormRef,
+    promptRef,
+    prompt,
+    offerable:
+      !speechInput.freezesEditor &&
+      !isComposerApprovalState &&
+      !activePendingProgress &&
+      !projectSelectionRequired &&
+      !showProviderUnavailable,
+    replace: applyPromptReplacementStable,
+  });
 
+  useRememberPromptHistory(composerDraftTarget, promptHistoryEntries);
   const onComposerCommandKey = (key: string, event: KeyboardEvent, isTaskItem?: boolean) =>
     composerCommandKeyHandler({
       keybindings,
@@ -2397,7 +2412,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       isSoftwareKeyboardOpen,
       isLiteralPendingAnswer,
       pendingUserInputs,
-      promptHistoryEntries,
+      promptHistoryEntries: promptHistoryFor(composerDraftTarget, promptHistoryEntries),
       promptHistoryPositionRef,
       composerDraftTarget,
       promptRef,
@@ -3709,6 +3724,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                     editorRef={composerEditorRef}
                     richTextEnabled={settings.composerRichTextEnabled}
                     literalText={isLiteralPendingAnswer}
+                    keywordProvider={selectedProvider}
                     isPathQueryActive={isPathQueryActiveStable}
                     value={activePendingProgress ? activePendingProgress.customAnswer : prompt}
                     cursor={composerCursor}
@@ -3742,10 +3758,12 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                             ? gt("Choose a project above to start a thread")
                             : showProviderUnavailable
                               ? gt("Enable a provider in Settings to send a message")
-                              : (offeredPromptSuggestion ?? m(DEFAULT_COMPOSER_PLACEHOLDER))
+                              : (selectionInputOffer ??
+                                offeredPromptSuggestion ??
+                                m(DEFAULT_COMPOSER_PLACEHOLDER))
                     }
                     placeholderSuffix={
-                      offeredPromptSuggestion !== null ? (
+                      selectionInputOffer !== null || offeredPromptSuggestion !== null ? (
                         <span className="ml-2 inline-flex align-[1px]">
                           <Kbd variant="outline">⇥ Tab</Kbd>
                         </span>

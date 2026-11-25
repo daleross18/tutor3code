@@ -11,6 +11,7 @@ import {
   getLocalEnvironmentEnabled,
   setLocalEnvironmentEnabled,
 } from "./methods/localEnvironment.ts";
+import { getHostDiskSpace } from "./methods/forkHostDisk.ts";
 import {
   getAdvertisedEndpoints,
   getServerExposureState,
@@ -73,9 +74,11 @@ import {
   setSnapShotAnimationDestination,
   setSnapShotShortcutSuppressed,
 } from "./methods/snapShot.ts";
+import { getSpotifyState, sendSpotifyCommand } from "./methods/forkSpotify.ts";
 import * as PreviewIpc from "./methods/preview.ts";
 import * as AppActivationIpc from "./methods/appActivation.ts";
 import * as WebLinksIpc from "./methods/webLinks.ts";
+import { setMenuBarUnread } from "./methods/forkMenuBarMethod.ts";
 import {
   completeLegacyLocalStorage,
   takeLegacyLocalStorage,
@@ -109,6 +112,9 @@ export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers"
   yield* ipc.handleSync(getLocalEnvironmentEnabled);
   yield* ipc.handle(setLocalEnvironmentEnabled);
   yield* ipc.handle(getHostEnvironmentId);
+  yield* ipc.handle(getHostDiskSpace);
+  yield* ipc.handle(getSpotifyState);
+  yield* ipc.handle(sendSpotifyCommand);
   yield* ipc.handle(getLocalEnvironmentBearerToken);
 
   yield* ipc.handle(startFileDrag);
@@ -163,6 +169,7 @@ export const installDesktopIpcHandlers = Effect.fn("desktop.ipc.installHandlers"
   yield* ipc.handle(checkSystemPermission);
   yield* ipc.handle(pasteAsText);
   yield* ipc.handle(revealWindow);
+  yield* ipc.handle(setMenuBarUnread);
   yield* ipc.handle(syncHtmlFullscreen);
   yield* ipc.handle(probeRemoteEditors);
   yield* ipc.handle(getUpdateState);

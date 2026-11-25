@@ -35,6 +35,7 @@ import {
 } from "../ThreadStatusIndicators";
 
 import { ThreadDetailsPrRow } from "./ThreadDetailsPrRow";
+import { ThreadPreviewLinkRow } from "../../panes/ThreadPreviewLink";
 
 function ThreadDetailsPrLinkRow({
   environmentId,
@@ -108,7 +109,12 @@ function ThreadDetailsPrRows({
               watching: false,
             },
           });
-  const currentRow = <ThreadDetailsPrRow {...row} onStopWatching={stopWatching(currentLink)} />;
+  const currentRow = (
+    <>
+      <ThreadDetailsPrRow {...row} onStopWatching={stopWatching(currentLink)} />
+      <ThreadPreviewLinkRow threadRef={threadRef} />
+    </>
+  );
   const rest =
     currentLink === null
       ? []

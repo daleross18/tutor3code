@@ -20,6 +20,9 @@ import type {
   DesktopAppActivationRequest,
   DesktopAppActivationResponse,
 } from "./desktopAppActivation.ts";
+import type { SpotifyCommand, SpotifyCommandResult, SpotifyStateResult } from "./forkSpotify.ts";
+
+export type * from "./forkSpotify.ts";
 
 export interface ContextMenuItem<T extends string = string> {
   id: T;
@@ -1101,6 +1104,10 @@ export interface DesktopBridge {
    * only the main process can spend a notification click's activation token.
    */
   revealWindow: () => Promise<void>;
+  /** Fork: the Mac menu bar item with the count of unread finished threads. Null removes it. */
+  setMenuBarUnread?: (
+    unread: { count: number; threads: ReadonlyArray<{ key: string; title: string }> } | null,
+  ) => Promise<void>;
   /**
    * The OS locale as a BCP-47 tag, which the renderer cannot read for itself:
    * the packaged app ships only the `en-US` Chromium locale pak, so
@@ -1117,6 +1124,11 @@ export interface DesktopBridge {
   setLocalEnvironmentEnabled: (enabled: boolean) => Promise<void>;
   /** The environment ID recorded in this app's T3 home, such as its own machine's background service. */
   getHostEnvironmentId?: () => Promise<string | null>;
+  /** Fork: the volume that holds the home directory of the app's own machine. */
+  getHostDiskSpace?: () => Promise<{ availableBytes: number; totalBytes: number } | null>;
+  /** Fork: the Spotify app of the app's own Mac, through AppleScript. */
+  getSpotifyState?: () => Promise<SpotifyStateResult>;
+  sendSpotifyCommand?: (command: SpotifyCommand) => Promise<SpotifyCommandResult>;
   getLocalEnvironmentBearerToken: () => Promise<string>;
   getClientSettings: () => Promise<ClientSettings | null>;
   setClientSettings: (settings: ClientSettings) => Promise<void>;
